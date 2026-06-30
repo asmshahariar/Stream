@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,10 +12,13 @@ export async function GET(request: Request) {
   }
 
   try {
+    const streamUrl = new URL(url);
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'VLC/3.0.16 LibVLC/3.0.16', // Spoof VLC to bypass User-Agent blocks
-        'Accept': '*/*'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Referer': streamUrl.origin + '/',
+        'Origin': streamUrl.origin,
       }
     });
 
