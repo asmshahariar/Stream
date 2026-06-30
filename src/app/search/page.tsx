@@ -29,9 +29,9 @@ export default function SearchPage() {
       // we can fetch all channels and filter, or we can just create a basic search route.
       // Let's use the GET /api/channels and filter here for now.
       const res = await fetch('/api/channels');
-      const data = await res.json();
+      const data: Array<{ _id: string, name: string, slug: string, logo: string, status: string, category?: { name: string }, [key: string]: unknown }> = await res.json();
       
-      const filtered = data.filter((channel: any) => {
+      const filtered = data.filter((channel) => {
         const q = query.toLowerCase();
         return channel.name.toLowerCase().includes(q) || 
                (channel.category && channel.category.name.toLowerCase().includes(q));

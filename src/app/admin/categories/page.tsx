@@ -47,7 +47,7 @@ export default function CategoriesManagement() {
     }
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: { _id: string, name: string, slug: string, icon: string, status: string, [key: string]: unknown }) => {
     setFormData({ name: category.name, slug: category.slug, icon: category.icon, status: category.status });
     setEditingId(category._id);
     setShowForm(true);

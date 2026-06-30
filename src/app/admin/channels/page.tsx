@@ -65,7 +65,7 @@ export default function ChannelsManagement() {
     setEditingId(null);
   }
 
-  const handleEdit = (channel: any) => {
+  const handleEdit = (channel: { _id: string, name: string, slug: string, logo: string, description: string, streamUrl: string, streamType: string, status: string, featured: boolean, category: { _id: string, [key: string]: unknown } | null, [key: string]: unknown }) => {
     setFormData({ 
       name: channel.name, slug: channel.slug, logo: channel.logo, category: channel.category?._id || '', 
       description: channel.description, streamUrl: channel.streamUrl, streamType: channel.streamType, 

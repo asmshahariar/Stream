@@ -8,7 +8,7 @@ interface ChannelCardProps {
     name: string;
     slug: string;
     logo: string;
-    category?: { name: string };
+    category?: { name: string, [key: string]: unknown } | null;
     status: string;
   }
 }

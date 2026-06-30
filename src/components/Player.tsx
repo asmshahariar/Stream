@@ -33,7 +33,7 @@ export default function Player({ src, type }: PlayerProps) {
     sourceType = typeMap[sourceType] || 'application/x-mpegurl';
   }
 
-  function onError(detail: any) {
+  function onError(detail: unknown) {
     console.error('Player error:', detail);
     setErrorMsg('The stream failed to load. The URL might be invalid, offline, or blocking access (CORS).');
   }
@@ -71,13 +71,18 @@ export default function Player({ src, type }: PlayerProps) {
             }
           }, 10000);
           
-          player.play().then(() => {
-            clearTimeout(loadTimeout);
-          }).catch((e: any) => {
-            console.error('TS AutoPlay blocked:', e);
-          });
+          const playPromise = player.play() as Promise<void> | void;
+          if (playPromise !== undefined && typeof playPromise.then === 'function') {
+            playPromise.then(() => {
+              clearTimeout(loadTimeout);
+            }).catch((e: unknown) => {
+              console.error('TS AutoPlay blocked:', e);
+            });
+          } else {
+             clearTimeout(loadTimeout);
+          }
           
-          player.on(mpegts.default.Events.ERROR, (errorType: any, errorDetail: any) => {
+          player.on(mpegts.default.Events.ERROR, (errorType: unknown, errorDetail: unknown) => {
             console.error("MPEGTS Error:", errorType, errorDetail);
             clearTimeout(loadTimeout);
             setErrorMsg("Playback failed. This stream might be offline or use unsupported codecs.");
@@ -134,7 +139,7 @@ export default function Player({ src, type }: PlayerProps) {
       <MediaPlayer
         className="w-full aspect-video"
         title="Live Stream"
-        src={{ src: finalSrc, type: sourceType }}
+        src={{ src: finalSrc, type: sourceType as "application/x-mpegurl" }}
         crossOrigin
         playsInline
         autoPlay

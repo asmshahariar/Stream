@@ -23,15 +23,14 @@ export default async function WatchPage({ params }: { params: Promise<{ slug: st
   }
 
   // Fetch related channels (same category, exclude current)
-  let relatedChannels = [];
-  if (channel.category) {
-    relatedChannels = await Channel.find({ 
-      category: channel.category._id, 
-      _id: { $ne: channel._id } 
-    }).limit(4).lean();
-  }
+  const relatedChannels = channel.category 
+    ? await Channel.find({ 
+        category: channel.category._id, 
+        _id: { $ne: channel._id } 
+      }).limit(4).lean()
+    : [];
 
-  const serializeChannel = (c: any) => ({
+  const serializeChannel = (c: { _id: { toString(): string }, name: string, slug: string, logo: string, status: string, streamUrl: string, streamType: string, description: string, category?: { _id: { toString(): string }, name: string, [key: string]: unknown } | null, [key: string]: unknown }) => ({
     ...c,
     _id: c._id.toString(),
     category: c.category ? { ...c.category, _id: c.category._id.toString() } : null

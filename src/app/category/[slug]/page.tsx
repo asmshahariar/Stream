@@ -16,7 +16,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   const channels = await Channel.find({ category: category._id }).populate('category').sort({ createdAt: -1 }).lean();
 
-  const serializeChannel = (c: any) => ({
+  const serializeChannel = (c: { _id: { toString(): string }, name: string, slug: string, logo: string, status: string, category?: { _id: { toString(): string }, name: string, [key: string]: unknown } | null, [key: string]: unknown }) => ({
     ...c,
     _id: c._id.toString(),
     category: c.category ? { ...c.category, _id: c.category._id.toString() } : null

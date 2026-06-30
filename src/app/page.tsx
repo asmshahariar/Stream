@@ -1,6 +1,6 @@
 import ChannelCard from '@/components/ChannelCard';
 import SearchBar from '@/components/SearchBar';
-import Scoreboard from '@/components/Scoreboard';
+import Scoreboard, { Match } from '@/components/Scoreboard';
 import connectToDatabase from '@/lib/mongodb';
 import Channel from '@/models/Channel';
 import Category from '@/models/Category';
@@ -24,13 +24,13 @@ async function getHomeData(searchQuery?: string) {
     const recentChannels = await Channel.find(query).populate('category').sort({ createdAt: -1 }).lean();
 
     // Convert _id to string for serialization
-    const serializeChannels = (channels: any[]) => channels.map(c => ({
+    const serializeChannels = (channels: Array<{ _id: { toString(): string }, name: string, slug: string, logo: string, status: string, category?: { _id: { toString(): string }, name: string, [key: string]: unknown } | null, [key: string]: unknown }>) => channels.map(c => ({
       ...c,
       _id: c._id.toString(),
       category: c.category ? { ...c.category, _id: c.category._id.toString() } : null
     }));
 
-    const serializeCategories = (cats: any[]) => cats.map(c => ({
+    const serializeCategories = (cats: Array<{ _id: { toString(): string }, name: string, slug: string, icon?: string, [key: string]: unknown }>) => cats.map(c => ({
       ...c,
       _id: c._id.toString(),
     }));
@@ -66,16 +66,16 @@ export default async function Home({
 
   const { categories, liveChannels, popularChannels, recentChannels } = homeData;
   
-  let matches: any[] = [];
+  let matches: Match[] = [];
   try {
     await connectToDatabase();
     const dbMatches = await MatchModel.find({}).sort({ createdAt: -1 }).lean();
-    matches = dbMatches.map(m => ({
+    matches = dbMatches.map((m) => ({
       ...m,
       _id: m._id.toString(),
       id: m._id.toString(), // Scoreboard uses id
       channelId: m.channelId ? m.channelId.toString() : undefined
-    }));
+    })) as unknown as Match[];
   } catch (error) {
     console.error("Failed to fetch matches", error);
   }
@@ -131,7 +131,7 @@ export default async function Home({
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
             
             <div className="flex overflow-x-auto gap-3 pb-4 pt-1 snap-x scrollbar-hide hide-scroll-bar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {categories.map((category: any) => (
+              {categories.map((category) => (
                 <Link 
                   key={category._id} 
                   href={`/category/${category.slug}`}
@@ -154,7 +154,7 @@ export default async function Home({
               <p className="text-gray-400 py-8 text-center bg-white/5 rounded-xl border border-white/10">No channels found matching your search.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {recentChannels.map((channel: any, index: number) => (
+                {recentChannels.map((channel, index: number) => (
                   <div key={channel._id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
                     <ChannelCard channel={channel} />
                   </div>
@@ -176,7 +176,7 @@ export default async function Home({
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {popularChannels.map((channel: any, index: number) => (
+              {popularChannels.map((channel, index: number) => (
                 <div key={channel._id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
                   <ChannelCard channel={channel} />
                 </div>
@@ -197,7 +197,7 @@ export default async function Home({
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {liveChannels.map((channel: any, index: number) => (
+              {liveChannels.map((channel, index: number) => (
                 <div key={channel._id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
                   <ChannelCard channel={channel} />
                 </div>
@@ -218,7 +218,7 @@ export default async function Home({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {recentChannels.map((channel: any, index: number) => (
+              {recentChannels.map((channel, index: number) => (
                 <div key={channel._id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
                   <ChannelCard channel={channel} />
                 </div>
